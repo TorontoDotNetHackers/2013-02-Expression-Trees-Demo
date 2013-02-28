@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+
+<program>
+
+  <printLine value="This is a demo of the TDNH-XML# language being compiled and run." />
+  <printLine value="Sample source code files are in the folder project source/*.xml" />
+  <printLine value="" />
+  <printLine value="** This program displays the word Hello 10 times on the console using an XML loop. **" />
+  <printLine value="" />
+
+  <for varName="x" initValue="0" lessThan="10" incrementBy="1">
+    <printLine value="Hello" />
+  </for>
+
+  <printLine value="" />
+  <printLine value="The End" />
+
+</program>

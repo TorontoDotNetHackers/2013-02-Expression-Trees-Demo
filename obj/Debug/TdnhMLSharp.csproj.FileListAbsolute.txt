@@ -1,0 +1,8 @@
+C:\Users\John\Dropbox\scratch_dev\TdnhMLSharp\bin\Debug\TdnhMLSharp.exe.config
+C:\Users\John\Dropbox\scratch_dev\TdnhMLSharp\bin\Debug\TdnhMLSharp.exe
+C:\Users\John\Dropbox\scratch_dev\TdnhMLSharp\bin\Debug\TdnhMLSharp.pdb
+C:\Users\John\Dropbox\scratch_dev\TdnhMLSharp\obj\Debug\TdnhMLSharp.csprojResolveAssemblyReference.cache
+C:\Users\John\Dropbox\scratch_dev\TdnhMLSharp\obj\Debug\TdnhMLSharp.exe
+C:\Users\John\Dropbox\scratch_dev\TdnhMLSharp\obj\Debug\TdnhMLSharp.pdb
+C:\Users\John\Dropbox\scratch_dev\TdnhMLSharp\bin\Debug\source\Hi.xml
+C:\Users\John\Dropbox\scratch_dev\TdnhMLSharp\bin\Debug\source\HelloWorldLoop.xml
