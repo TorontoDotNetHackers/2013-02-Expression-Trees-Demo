@@ -2,17 +2,23 @@
 
 <program>
 
-  <printLine value="This is a demo of the TDNH-XML# language being compiled and run." />
-  <printLine value="Sample source code files are in the folder project source/*.xml" />
-  <printLine value="" />
-  <printLine value="** This program displays the word Hello 10 times on the console using an XML loop. **" />
-  <printLine value="" />
+	<printLine value="This is a demo of the TDNH-XML# language being compiled and run." />
+	<printLine value="Sample source code files are in the folder project source/*.xml" />
+	<printLine value="" />
+	<printLine value="** Display Hello 10x **" />
+	<printLine value="" />
 
-  <for varName="x" initValue="0" lessThan="10" incrementBy="1">
-    <printLine value="Hello" />
-  </for>
+	<for varName="x" initValue="0" lessThan="10" incrementBy="1">
+		<printLine value="Hello" />
+	</for>
 
-  <printLine value="" />
-  <printLine value="The End" />
+	<printLine value="** Display World 5x **" />
+
+	<for varName="y" initValue="0" lessThan="5" incrementBy="1">
+		<printLine value="World" />
+	</for>
+
+	<printLine value="" />
+	<printLine value="The End" />
 
 </program>

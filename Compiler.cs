@@ -1,71 +1,71 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq.Expressions;
+using System.Linq.Expressions; 
 using System.Reflection;
+using System.Reflection.Emit;
 using System.Xml.Linq;
 
 namespace TdnhMLSharp
 {
     /// <summary>
-    /// Compiles XML source code statements into an expression tree
-    /// and provides a delegate that encapsulates the instructions 
-    /// and can be run (executed) at a later time.
+    /// Parses XML source code statements into an expression tree that is compiled and run.
     /// </summary>
+    /// 
     static class Compiler
     {
         /// <summary>
-        /// Main entry point of the compiler. 
+        /// The parsed command line arguments. 
+        /// </summary>
+        /// 
+        static Arguments ParsedCommandArgs = null;
+
+        /// <summary>
+        /// Main entry point of our "compiler". 
         /// </summary>
         /// <param name="args"></param>
         /// 
         static int Main(string[] args)
         {
-            if (args.Length == 0)
-            {
-                Console.WriteLine("Usage: {0} sourceCode.xml ", Environment.CommandLine);
-                return 1;
-            }   
+            // process command line arguments 
 
-            // Grab the XML file from the command line
-            string sourceFilePath = args[0];
+            Exception[] commandLineErrors = null;
+            if (!TryProcessCommandLineArgs(args, out ParsedCommandArgs, out commandLineErrors))
+            {
+                foreach (Exception e in commandLineErrors)
+                    Console.WriteLine("Command Line Error: {0}", e.Message);
+                return 1;
+            }
+
+            // Read the XML file
+            string sourceFilePath = ParsedCommandArgs.RequiredInfileSpec;
             FileStream sourceStream = File.OpenRead(sourceFilePath);
             StreamReader sourceReader = new StreamReader(sourceStream);
             string programXmlText = sourceReader.ReadToEnd();
 
-            // this is the point of the demo
-            Delegate programFunc = Compiler.Compile(programXmlText);
+            // Compile the XML source code into an Assembly (builds expression trees to support the process).
+            LambdaExpression exprLambdaProgram = Compiler.CompileXml(programXmlText);
 
-            // run the compiled delegate 
-            programFunc.DynamicInvoke(null);
+            if (ParsedCommandArgs.IsOutputFileSpecified)
+            {
+                SaveToDisk(exprLambdaProgram, ParsedCommandArgs.OptionalOutfileSpec);
+            }
+
+            if (ParsedCommandArgs.RunAfterBuild)
+            {
+                // Compile a delegate 
+                Delegate func = exprLambdaProgram.Compile();
+                // run the compiled delegate 
+                func.DynamicInvoke(null);
 #if DEBUG
-            Console.WriteLine("\nHit [enter] to exit ...");
-            Console.ReadLine();
+                // Hack: pause Visual Studio window before it disappears (whether we're debugging in VS or not)
+                Console.WriteLine("\nHit [enter] to exit ...");
+                Console.ReadLine();
 #endif
-            return 0;
-        }
+            }
 
-        /// <summary>
-        /// Compiles the provided XML source code into a delegate
-        ///  for deferred execution at a later point. 
-        /// </summary>
-        /// <param name="xmlText">The XML source code to compile.</param>
-        /// <returns>A parameterless delegate representing the instructions of the XML source.</returns>
-        /// 
-        static Delegate Compile(string xmlText)
-        {
-            // convert text to XML 
-            XDocument xdoc = XDocument.Parse(xmlText);
-
-            // Convert XML to expression tree 
-            BlockExpression exprProgramBlock = Compiler.ConvertXmlElementsIntoExpressionTree(xdoc.Root.Elements());
-
-            // Compile expression tree into a Delegate. 
-            LambdaExpression lambdaProgram = Expression.Lambda(exprProgramBlock, new ParameterExpression[0]);
-            var programFunc = lambdaProgram.Compile();
-
-            // return the delegate instance
-            return programFunc;
+            return 0; // success
         }
 
         /// <summary>
@@ -155,6 +155,165 @@ namespace TdnhMLSharp
 
             // Convert all the created expressions into one execution block for the caller 
             return Expression.Block(expressions);
+        }
+
+        /// <summary>
+        /// Processes the given command line arguments and parses them into an <see cref="Arguments"/> instance. 
+        /// </summary>
+        /// <param name="commandArgs">command line args to process</param>
+        /// <param name="parsedArgs">the parsed arguments if no parsing errors occur</param>
+        /// <param name="errors">a list of errors in the commnand line arguments</param>
+        /// <returns>true if the command line args were succesfully fully parsed, otherwise false</returns>
+        /// <remarks>
+        /// If this method returns false then the <paramref name="parsedArgs"/> value will be null and
+        ///  the <paramref name="errors"/> array will be null.
+        ///  If the method returns true then the <paramref name="parsedArgs"/> value will be present and
+        ///  the <paramref name="errors"/> array will have at least one element. 
+        /// </remarks>
+        /// 
+        static bool TryProcessCommandLineArgs(string[] commandArgs, out Arguments parsedArgs, out Exception[] errors)
+        {
+            List<Exception> problems = new List<Exception>();
+            parsedArgs = new Arguments();
+
+            if (commandArgs != null)
+            {
+                try
+                {
+                    for (int i = 0; i < commandArgs.Length; ++i)
+                    {
+                        switch (commandArgs[i])
+                        {
+                            case Arguments.ParamInfileSpec:
+                                parsedArgs.RequiredInfileSpec = commandArgs[++i];
+                                break;
+                            case Arguments.ParamOutfileSpec:
+                                parsedArgs.OptionalOutfileSpec = commandArgs[++i];
+                                break;
+                            case Arguments.ParamRun:
+                                parsedArgs.RunAfterBuild = true;
+                                break;
+                            default:
+                                problems.Add(new Exception(string.Format("uknown param '{0}'", commandArgs[i])));
+                                break;
+                        }
+                    }
+
+                    if (string.IsNullOrWhiteSpace(parsedArgs.RequiredInfileSpec))
+                        problems.Add(new Exception(string.Format("Must specify a source code file to process with the {0} parameter.", Arguments.ParamInfileSpec)));
+                }
+                catch (Exception e)
+                {
+                    problems.Add(e);
+                }
+
+            }
+
+            bool failedParsing = problems.Any();
+            if (failedParsing)
+            {
+                errors = problems.ToArray();
+                parsedArgs = null;
+            }
+            else
+            {
+                errors = null;
+            }
+            return !failedParsing;
+        }
+
+        /// <summary>
+        /// To represent command line parameters and hold a set of parsed arguments. 
+        /// </summary>
+        /// 
+        class Arguments
+        {
+            /// <summary>
+            /// The command line input file specification parameter 
+            /// </summary>
+            public const string ParamInfileSpec = "/in";
+
+            /// <summary>
+            /// The command line output file specification parameter
+            /// </summary>
+            public const string ParamOutfileSpec = "/out";
+
+            /// <summary>
+            /// The command line parameter to tell the compiler to also run the program. 
+            /// </summary>
+            public const string ParamRun = "/run";
+
+            /// <summary>
+            /// Parsed value of the run option. 
+            /// </summary>
+            public bool RunAfterBuild = false;
+
+            /// <summary>
+            /// Parsed value of the input file specification. 
+            /// </summary>
+            public string RequiredInfileSpec = null;
+
+            /// <summary>
+            /// Parsed value of the output file specification. 
+            /// </summary>
+            public string OptionalOutfileSpec = null;
+
+            public bool IsOutputFileSpecified { get { return !string.IsNullOrEmpty(ParamOutfileSpec); } }
+
+        }
+
+        /// <summary>
+        /// Compiles the provided XML source code into a delegate
+        ///  for deferred execution at a later point. 
+        /// </summary>
+        /// <param name="xmlText">The XML source code to compile.</param>
+        /// <returns>A parameterless delegate representing the instructions of the XML source.</returns>
+        /// 
+        static LambdaExpression CompileXml(string xmlText)
+        {
+            // convert text to XML 
+            XDocument xdoc = XDocument.Parse(xmlText);
+
+            // Convert XML into an expression tree 
+            BlockExpression exprProgramBlock = Compiler.ConvertXmlElementsIntoExpressionTree(xdoc.Root.Elements());
+
+            // Turn expression tree into a lambda. 
+            LambdaExpression lambdaProgram = Expression.Lambda(exprProgramBlock, new ParameterExpression[0]);
+            return lambdaProgram;
+
+        }
+
+        /// <summary>
+        /// Saves the given lambda expression to disk as an executable assembly 
+        /// under the given filename. 
+        /// </summary>
+        /// <param name="exprLambdaProgram">Lambda to save.</param>
+        /// <param name="fileSpec">Output file specification.</param>
+        /// <remarks>
+        /// Code from: http://stackoverflow.com/questions/15168150/how-to-save-an-expression-tree-as-the-main-entry-point-to-a-new-executable-disk
+        /// </remarks>
+        /// 
+        static void SaveToDisk(LambdaExpression exprLambdaProgram, string fileSpec)
+        {
+            string outputFilename = Path.GetFileName(fileSpec);
+            string assemblyName = outputFilename.Substring(0, outputFilename.Length - Path.GetExtension(outputFilename).Length);
+
+            // Attach the expression as a method to a dynamic assembly
+            var asmName = new AssemblyName(assemblyName);
+            var asmBuilder = AssemblyBuilder.DefineDynamicAssembly
+                (asmName, AssemblyBuilderAccess.RunAndSave);
+            var moduleBuilder = asmBuilder.DefineDynamicModule(assemblyName, outputFilename);
+
+            var typeBuilder = moduleBuilder.DefineType("Program", TypeAttributes.Public);
+            var methodBuilder = typeBuilder.DefineMethod("Main",
+                MethodAttributes.Static, typeof(void), new[] { typeof(string) });
+
+            exprLambdaProgram.CompileToMethod(methodBuilder);
+
+            // Save the dynamic assembly to disk as an executable. 
+            typeBuilder.CreateType();
+            asmBuilder.SetEntryPoint(methodBuilder);
+            asmBuilder.Save(outputFilename);
         }
 
     }//class 

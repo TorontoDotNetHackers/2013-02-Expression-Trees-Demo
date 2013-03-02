@@ -6,3 +6,11 @@ C:\Users\John\Dropbox\scratch_dev\TdnhMLSharp\obj\Debug\TdnhMLSharp.exe
 C:\Users\John\Dropbox\scratch_dev\TdnhMLSharp\obj\Debug\TdnhMLSharp.pdb
 C:\Users\John\Dropbox\scratch_dev\TdnhMLSharp\bin\Debug\source\Hi.xml
 C:\Users\John\Dropbox\scratch_dev\TdnhMLSharp\bin\Debug\source\HelloWorldLoop.xml
+C:\Users\jkane.ECENTRICARTS\Documents\GitHub\2013-02-Expression-Trees-Demo\bin\Debug\TdnhMLSharp.exe.config
+C:\Users\jkane.ECENTRICARTS\Documents\GitHub\2013-02-Expression-Trees-Demo\obj\Debug\TdnhMLSharp.exe
+C:\Users\jkane.ECENTRICARTS\Documents\GitHub\2013-02-Expression-Trees-Demo\obj\Debug\TdnhMLSharp.pdb
+C:\Users\jkane.ECENTRICARTS\Documents\GitHub\2013-02-Expression-Trees-Demo\bin\Debug\source\Hi.xml
+C:\Users\jkane.ECENTRICARTS\Documents\GitHub\2013-02-Expression-Trees-Demo\bin\Debug\source\HelloWorldLoop.xml
+C:\Users\jkane.ECENTRICARTS\Documents\GitHub\2013-02-Expression-Trees-Demo\bin\Debug\TdnhMLSharp.exe
+C:\Users\jkane.ECENTRICARTS\Documents\GitHub\2013-02-Expression-Trees-Demo\bin\Debug\TdnhMLSharp.pdb
+C:\Users\jkane.ECENTRICARTS\Documents\GitHub\2013-02-Expression-Trees-Demo\obj\Debug\TdnhMLSharp.csprojResolveAssemblyReference.cache
