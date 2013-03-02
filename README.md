@@ -1,5 +1,5 @@
-Quick Start Instructions
-=====
+Quick Start Instructions 
+===== 
 
 Use a source file from the project's source/ folder: any of the XML files, or make a new one. Compile your source:  
   
@@ -26,6 +26,8 @@ This Console program is a basic compiler that accepts an XML file on the command
 This program is buggy, for example, nested for loops don't work as expected.  It is meant to be an expression tree demo more than an actual compiler.  The potential of expression trees are evident. 
 
 --jdk
+
+Distrubited under The MIT License (MIT): http://opensource.org/licenses/MIT
 
 
 Version History (reverse chronology)
