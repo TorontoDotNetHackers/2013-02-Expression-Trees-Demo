@@ -1,3 +1,19 @@
+Quick Start Instructions
+=====
+
+Use a source file from the project's source/ folder: any of the XML files, or make a new one. Compile your source:  
+  
+    bin/Debug/TdnhMLSharp.exe /in "source\HelloWorldLoop.xml"  /out "HelloWord.exe"  /run
+
+Now you have a compiled verion of your XML file on disk!  The /run param causes the compiled code to be run immediately.
+
+The Visual Studio Project is set up with the above command line arguments, as a demo, out of the box.  Simply build and run. The demo EXE is output inside the bin folder.  See the project properties' Debug tab for these details. 
+    
+Visual Studio 2012 Console application, .NET 4.5
+
+Overview
+=========
+
 This is a very simple demo of creating .NET expression trees for a purpose. It was part of a session in which the Toronto .NET Hackers focused on the theme of ".NET Expression Trees" in the February 2013 meeting.
 
 This project was an attempt to create a simple compiler that takes an XML source code file containing programming instructions and convert those instructions into a .NET expression tree that is compiled and executed. 
@@ -13,7 +29,7 @@ This program is buggy, for example, nested for loops don't work as expected.  It
 
 
 Version History (reverse chronology)
-=======================================
+------------------------------------
 
 0.2.0.0 alpha - March 1, 2013
 

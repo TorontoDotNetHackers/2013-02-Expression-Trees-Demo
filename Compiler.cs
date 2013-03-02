@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq.Expressions; 
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Xml.Linq;
@@ -54,12 +54,12 @@ namespace TdnhMLSharp
 
             if (ParsedCommandArgs.RunAfterBuild)
             {
-                // Compile a delegate 
+                // compile a delegate of our program
                 Delegate func = exprLambdaProgram.Compile();
                 // run the compiled delegate 
                 func.DynamicInvoke(null);
 #if DEBUG
-                // Hack: pause Visual Studio window before it disappears (whether we're debugging in VS or not)
+                // A hack to pause the Visual Studio window before it closes (whether we're debugging from VS or not!)
                 Console.WriteLine("\nHit [enter] to exit ...");
                 Console.ReadLine();
 #endif
@@ -98,13 +98,14 @@ namespace TdnhMLSharp
                     // create a loop break target
                     LabelTarget breakTarget = Expression.Label();
 
-                    /* Create the core logic of the loop. This includes 
-                     * - a generated check to break out the loop properly based on counter attributes
-                     * - the XML logic of the loop itself. 
+                    /* Create the core logic of the loop. This includes: 
+                     * - generate a check to break out the loop based on counter value;
+                     * - the loop itself;
+                     * - the execution body of the loop taken from nested XML.
                      */
                     BlockExpression loopCore = Expression.Block(new[] { peCounterVar }, new List<Expression> { 
 
-                        // Write the loop's conditional check and break action for when it's reached
+                        // Write the loop's conditional check and break action 
                         Expression.IfThen(
                                 Expression.GreaterThanOrEqual(peCounterVar, Expression.Constant(targetNum)),
                                 Expression.Break(breakTarget)
@@ -112,7 +113,7 @@ namespace TdnhMLSharp
                         // increment the loop counter 
                         Expression.AddAssign(peCounterVar, Expression.Constant(incNum)),
 
-                        /* Recurse into child XML elements of the 'for' element and parse them
+                        /* Recurse into XML child elements of the 'for' element and parse them
                          * into expressions to become the core execution logic of the loop iteration. 
                          */ 
                         Compiler.ConvertXmlElementsIntoExpressionTree(el.Elements()),
@@ -127,11 +128,11 @@ namespace TdnhMLSharp
                             Expression.Loop(loopCore, breakTarget)
                         });
 
-                    // add the loop logic to the program instructions 
+                    // add the loop logic to the program's instructions 
                     expressions.Add(loopWithExit);
                 }
 
-                // process 'printLine' command
+                // process a 'printLine' command
 
                 else if (el.Name == "printLine")
                 {
@@ -151,6 +152,16 @@ namespace TdnhMLSharp
                     // Add the printline expression to the program's expressions 
                     expressions.Add(exprConsoleWriteLine_Value);
                 }
+                else
+                {
+                    ; // << intentional ... tsk tsk. 
+
+                    /* We're skipping anything we don't understand. 
+                     * Yep, a really bad practice for a compiler: to LEAVE OUT logic. 
+                     * DISCLAIMER: Demo app only!
+                     */
+                }
+
             }
 
             // Convert all the created expressions into one execution block for the caller 
@@ -263,11 +274,10 @@ namespace TdnhMLSharp
         }
 
         /// <summary>
-        /// Compiles the provided XML source code into a delegate
-        ///  for deferred execution at a later point. 
+        /// "Compiles" the provided XML source code into a lambda expression. 
         /// </summary>
         /// <param name="xmlText">The XML source code to compile.</param>
-        /// <returns>A parameterless delegate representing the instructions of the XML source.</returns>
+        /// <returns>A LambdaExpression.</returns>
         /// 
         static LambdaExpression CompileXml(string xmlText)
         {
@@ -278,8 +288,8 @@ namespace TdnhMLSharp
             BlockExpression exprProgramBlock = Compiler.ConvertXmlElementsIntoExpressionTree(xdoc.Root.Elements());
 
             // Turn expression tree into a lambda. 
-            LambdaExpression lambdaProgram = Expression.Lambda(exprProgramBlock, new ParameterExpression[0]);
-            return lambdaProgram;
+            LambdaExpression exprLambdaProgram = Expression.Lambda(exprProgramBlock, new ParameterExpression[0]);
+            return exprLambdaProgram;
 
         }
 
@@ -316,5 +326,5 @@ namespace TdnhMLSharp
             asmBuilder.Save(outputFilename);
         }
 
-    }//class 
+    }
 }

@@ -71,6 +71,7 @@
     </Content>
     <Content Include="source\HelloWorldLoop.xml">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
     </Content>
   </ItemGroup>
   <ItemGroup>
