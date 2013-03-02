@@ -9,18 +9,19 @@ This Console program is a basic compiler that accepts an XML file on the command
 
 This program is buggy, for example, nested for loops don't work as expected.  It is meant to be an expression tree demo more than an actual compiler.  The potential of expression trees are evident. 
 
+--jdk
 
-=======================================
+
 Version History (reverse chronology)
 =======================================
 
-0.0.2.0 alpha - March 1, 2013
+0.2.0.0 alpha - March 1, 2013
 
 Added features:
 * Proper command line parameters /run /out filename /in filename
 * Ability to optionally save as .EXE assembly on disk
 
-0.0.1.0 alpha - Feb 2013
+0.1.0.0 alpha - Feb 2013
 
 Initial functionality created, includes: 
 1- Accept XML input file on command line; 
